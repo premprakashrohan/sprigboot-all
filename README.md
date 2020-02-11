@@ -1,0 +1,1 @@
+# sprigboot-all
