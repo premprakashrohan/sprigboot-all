@@ -65,12 +65,13 @@ class CustomerRepo {
 					{ 2, new Customer(2, "krish", new Date(2014, 04, 12)) }, })
 			.collect(Collectors.toMap(data -> (Integer) data[0], data -> (Customer) data[1]));
 
-	public void add(Customer customer) {
+	public Customer add(Customer customer) {
 		if (customer.getId() == 0) {
 			customer.setId(customerMap.size() + 1);
 
 		}
 		customerMap.put(customer.getId(), customer);
+		return customer;
 	}
 
 	public Customer get(int id) {
@@ -98,8 +99,8 @@ class CustomerService {
 	@Autowired
 	CustomerRepo repo;
 
-	public void add(Customer customer) {
-		repo.add(customer);
+	public Customer add(Customer customer) {
+		return repo.add(customer);
 	}
 
 	public Customer get(int id) {
