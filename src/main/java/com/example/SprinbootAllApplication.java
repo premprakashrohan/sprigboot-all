@@ -98,7 +98,7 @@ class CutomerController {
 	@Autowired
 	CustomerService customerService;
 
-	@GetMapping(value = "/customers", produces = "application/json")
+	@GetMapping(value = "/customers", produces = {"application/json","application/xml"})
 	public List<Customer> getAllCustomer() {
 		return customerService.getAll();
 	}
