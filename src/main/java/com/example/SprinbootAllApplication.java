@@ -1,13 +1,16 @@
 package com.example;
 
+import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.*;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,12 +76,13 @@ class CutomerController {
 	}
 
 	@GetMapping(value = "/customers/{id}", produces = "application/json")
-	public Customer getCustomerById(@PathVariable("id") int id) {
+	public EntityModel<Customer> getCustomerById(@PathVariable("id") int id) {
 		Customer c = customerService.get(id);
 		if (c == null) {
 			throw new CustomerNotFoundException("Customer Not Found!!");
 		}
-		return c;
+
+		return new EntityModel<Customer>(c, linkTo(methodOn(this.getClass()).getAllCustomer()).withRel("all-users"));
 
 	}
 
@@ -114,7 +118,7 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 	@ExceptionHandler(Exception.class)
 	public final ResponseEntity<Object> handleAllException(Exception ex, WebRequest request) throws Exception {
 		ExceptionResponse er = new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
-		return new ResponseEntity<>(er, HttpStatus.INTERNAL_SERVER_ERROR); 
+		return new ResponseEntity<>(er, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@ExceptionHandler(CustomerNotFoundException.class)
@@ -123,11 +127,12 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 		ExceptionResponse er = new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 		return new ResponseEntity<>(er, HttpStatus.NOT_EXTENDED);
 	}
-	
+
 	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(
-			MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-		ExceptionResponse er = new ExceptionResponse(new Date(),"VALIDATION Failed!!" , ex.getBindingResult().toString());
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+		ExceptionResponse er = new ExceptionResponse(new Date(), "VALIDATION Failed!!",
+				ex.getBindingResult().toString());
 		return new ResponseEntity<>(er, HttpStatus.BAD_REQUEST);
 	}
 }
