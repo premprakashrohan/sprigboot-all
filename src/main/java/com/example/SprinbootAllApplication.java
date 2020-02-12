@@ -3,11 +3,15 @@ package com.example;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -79,7 +83,7 @@ class CutomerController {
 	}
 
 	@PostMapping(value = "/customers", consumes = "application/json")
-	public ResponseEntity<Object> saveCustomer(@RequestBody Customer customer) {
+	public ResponseEntity<Object> saveCustomer(@Valid @RequestBody Customer customer) {
 		Customer savedCustomer = customerService.add(customer);
 		return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(savedCustomer.getId()).toUri()).build();
@@ -114,10 +118,17 @@ class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 	}
 
 	@ExceptionHandler(CustomerNotFoundException.class)
-	public final ResponseEntity<Object> handleAllException(CustomerNotFoundException ex, WebRequest request)
+	public final ResponseEntity<Object> handleUserNotFoundException(CustomerNotFoundException ex, WebRequest request)
 			throws Exception {
 		ExceptionResponse er = new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 		return new ResponseEntity<>(er, HttpStatus.NOT_EXTENDED);
+	}
+	
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(
+			MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+		ExceptionResponse er = new ExceptionResponse(new Date(),"VALIDATION Failed!!" , ex.getBindingResult().toString());
+		return new ResponseEntity<>(er, HttpStatus.BAD_REQUEST);
 	}
 }
 

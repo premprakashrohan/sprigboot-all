@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 public class Customer {
 	private int id;
+	@Size(min = 2)
 	private String name;
+	@Past
 	private Date dob;
 
 	public Customer() {
