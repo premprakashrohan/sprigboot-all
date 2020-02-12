@@ -3,6 +3,7 @@ package com.example;
 import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
@@ -10,6 +11,9 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,14 +26,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
+@Configuration
 @SpringBootApplication
 public class SprinbootAllApplication {
 
@@ -38,6 +45,19 @@ public class SprinbootAllApplication {
 
 	}
 
+	@Bean
+	public LocaleResolver localeResolver() {
+		SessionLocaleResolver lr = new SessionLocaleResolver();
+		lr.setDefaultLocale(Locale.US);
+		return lr;
+	}
+
+	@Bean
+	public ResourceBundleMessageSource messageSource() {
+		ResourceBundleMessageSource rbms = new ResourceBundleMessageSource();
+		rbms.setBasename("messages");
+		return rbms;
+	}
 }
 
 @RestController
@@ -61,6 +81,14 @@ class HelloWorldController {
 	@GetMapping(value = "/hwobpv/{name}", produces = "application/json") // myApp/hwob/prem
 	public HelloWorldBean helloWorldByBeanByPathVariable(@PathVariable("name") String name) {
 		return new HelloWorldBean("Hello " + name + "!!!");
+	}
+
+	@Autowired
+	ResourceBundleMessageSource messageResource;
+
+	@GetMapping(value = "/hwi", produces = "application/json")
+	public String helloWorldInternationalization(@RequestHeader(name="Accept-Language",required = false) Locale locale) {
+		return messageResource.getMessage("hello.world", null, locale);
 	}
 
 }
