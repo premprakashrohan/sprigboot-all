@@ -1,11 +1,12 @@
 package com.example;
 
-import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.*;
+//import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.linkTo;
+//import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.methodOn;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.annotation.Resource;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.hateoas.EntityModel;
+//import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,13 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 @Configuration
 @SpringBootApplication
 public class SprinbootAllApplication {
@@ -87,7 +95,8 @@ class HelloWorldController {
 	ResourceBundleMessageSource messageResource;
 
 	@GetMapping(value = "/hwi", produces = "application/json")
-	public String helloWorldInternationalization(@RequestHeader(name="Accept-Language",required = false) Locale locale) {
+	public String helloWorldInternationalization(
+			@RequestHeader(name = "Accept-Language", required = false) Locale locale) {
 		return messageResource.getMessage("hello.world", null, locale);
 	}
 
@@ -98,11 +107,11 @@ class CutomerController {
 	@Autowired
 	CustomerService customerService;
 
-	@GetMapping(value = "/customers", produces = {"application/json","application/xml"})
+	@GetMapping(value = "/customers", produces = { "application/json", "application/xml" })
 	public List<Customer> getAllCustomer() {
 		return customerService.getAll();
 	}
-
+/*
 	@GetMapping(value = "/customers/{id}", produces = "application/json")
 	public EntityModel<Customer> getCustomerById(@PathVariable("id") int id) {
 		Customer c = customerService.get(id);
@@ -112,7 +121,7 @@ class CutomerController {
 
 		return new EntityModel<Customer>(c, linkTo(methodOn(this.getClass()).getAllCustomer()).withRel("all-users"));
 
-	}
+	}*/
 
 	@PostMapping(value = "/customers", consumes = "application/json")
 	public ResponseEntity<Object> saveCustomer(@Valid @RequestBody Customer customer) {
@@ -189,4 +198,14 @@ class ExceptionResponse {
 		return details;
 	}
 
+}
+
+@Configuration
+@EnableSwagger2
+class SwaggerConfig {
+	@Bean
+	public Docket api() {
+		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
+				.paths(PathSelectors.any()).build();
+	}
 }
