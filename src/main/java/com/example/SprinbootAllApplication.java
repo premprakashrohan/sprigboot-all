@@ -1,11 +1,17 @@
 package com.example;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
 //import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.linkTo;
 //import static org.springframework.hateoas.server.mvc.ControllerLinkBuilder.methodOn;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -38,8 +44,12 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Contact;
+import springfox.documentation.service.VendorExtension;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -111,17 +121,17 @@ class CutomerController {
 	public List<Customer> getAllCustomer() {
 		return customerService.getAll();
 	}
-/*
-	@GetMapping(value = "/customers/{id}", produces = "application/json")
-	public EntityModel<Customer> getCustomerById(@PathVariable("id") int id) {
-		Customer c = customerService.get(id);
-		if (c == null) {
-			throw new CustomerNotFoundException("Customer Not Found!!");
-		}
-
-		return new EntityModel<Customer>(c, linkTo(methodOn(this.getClass()).getAllCustomer()).withRel("all-users"));
-
-	}*/
+	/*
+	 * @GetMapping(value = "/customers/{id}", produces = "application/json") public
+	 * EntityModel<Customer> getCustomerById(@PathVariable("id") int id) { Customer
+	 * c = customerService.get(id); if (c == null) { throw new
+	 * CustomerNotFoundException("Customer Not Found!!"); }
+	 * 
+	 * return new EntityModel<Customer>(c,
+	 * linkTo(methodOn(this.getClass()).getAllCustomer()).withRel("all-users"));
+	 * 
+	 * }
+	 */
 
 	@PostMapping(value = "/customers", consumes = "application/json")
 	public ResponseEntity<Object> saveCustomer(@Valid @RequestBody Customer customer) {
@@ -203,9 +213,23 @@ class ExceptionResponse {
 @Configuration
 @EnableSwagger2
 class SwaggerConfig {
+
+	public static final Contact DEFAULT_CONTACT = new Contact("Prem", "http://www.gmail.com",
+			"premprakashrohan@gmail.com");
+	public static final ApiInfo DEFAULT_API_INFO = new ApiInfoBuilder().contact(DEFAULT_CONTACT)
+			.title("My Api Document").description("Api Documentation").version("1.0").termsOfServiceUrl("urn:tos")
+			.license("Apache 2.0").licenseUrl("http://www.apache.org/licenses/LICENSE-2.0").build();
+	
+	public static final Set<String> DEFAULT_CONSUMER_PRODUCER= new HashSet<>(Arrays.asList("application/json","application/xml"));
+
 	@Bean
 	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
-				.paths(PathSelectors.any()).build();
+		return new Docket(DocumentationType.SWAGGER_2).consumes(DEFAULT_CONSUMER_PRODUCER)
+													  .produces(DEFAULT_CONSUMER_PRODUCER)
+													  .apiInfo(DEFAULT_API_INFO)
+													  .select()
+													  .apis(RequestHandlerSelectors.any())
+													  .paths(PathSelectors.any())
+													  .build();
 	}
 }
