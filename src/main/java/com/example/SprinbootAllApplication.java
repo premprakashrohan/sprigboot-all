@@ -118,6 +118,54 @@ class HelloWorldController {
 }
 
 @RestController
+class VersioningCutomerController {
+	@Autowired
+	CustomerService customerService;
+	com.example.v1.CustomerService customerServiceV1;
+//Urls
+	@GetMapping(value = "/v1/customers/{id}", produces = "application/json")
+	public Customer getCustomerByIdV1(@PathVariable("id") int id) {
+		return customerService.get(id);
+	}
+
+	@GetMapping(value = "/v2/customers/{id}", produces = "application/json")
+	public com.example.v1.Customer getCustomerByIdV2(@PathVariable("id") int id) {
+		return customerServiceV1.get(id);
+	}
+//Parameters
+	@GetMapping(value = "/v1/customers/param/{id}", produces = "application/json", params = "version=1")
+	public Customer getCustomerByIdV1ByParam(@PathVariable("id") int id) {
+		return customerService.get(id);
+	}
+
+	@GetMapping(value = "/v2/customers/param/{id}", produces = "application/json", params = "version=2")
+	public com.example.v1.Customer getCustomerByIdV2ByParam(@PathVariable("id") int id) {
+		return customerServiceV1.get(id);
+	}
+	
+//Headers
+	@GetMapping(value = "/v1/customers/header/{id}", produces = "application/json", headers = "X-API-VERSION=1")
+	public Customer getCustomerByIdV1ByHeader(@PathVariable("id") int id) {
+		return customerService.get(id);
+	}
+
+	@GetMapping(value = "/v2/customers/header/{id}", produces = "application/json", params = "X-API-VERSION=2")
+	public com.example.v1.Customer getCustomerByIdV2ByHeader(@PathVariable("id") int id) {
+		return customerServiceV1.get(id);
+	}
+//MIME type
+	@GetMapping(value = "/v1/customers/produces/{id}", produces = "application/vnd.ims.lis.v1.result+json")
+	public Customer getCustomerByIdV1ByProduces(@PathVariable("id") int id) {
+		return customerService.get(id);
+	}
+
+	@GetMapping(value = "/v2/customers/produces/{id}", produces = "application/vnd.ims.lis.v2.result+json")
+	public com.example.v1.Customer getCustomerByIdV2ByProduces(@PathVariable("id") int id) {
+		return customerServiceV1.get(id);
+	}
+}
+
+@RestController("customerControllerV1")
 class CutomerController {
 	@Autowired
 	CustomerService customerService;

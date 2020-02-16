@@ -69,7 +69,7 @@ public class Customer {
 	}
 }
 
-@Component
+@Component("customerRepoV1")
 class CustomerRepo {
 	Map<Integer, Customer> customerMap = Stream
 			.of(new Object[][] { { 1, new Customer(1, "prem", new Date(1980, 02, 14)) },
@@ -105,7 +105,7 @@ class CustomerRepo {
 
 }
 
-@Service
+@Service("customerServiceV1")
 class CustomerService {
 	@Autowired
 	CustomerRepo repo;
