@@ -14,10 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 @ApiModel
+@JsonIgnoreProperties("id")
 public class Customer {
+	@JsonIgnore
 	private int id;
 	@Size(min = 2)
 	@ApiModelProperty("Name should be greater then 2 chars")
