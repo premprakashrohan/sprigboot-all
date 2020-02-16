@@ -25,6 +25,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,6 +44,10 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -121,21 +126,34 @@ class CutomerController {
 	public List<Customer> getAllCustomer() {
 		return customerService.getAll();
 	}
-	/*
-	 * @GetMapping(value = "/customers/{id}", produces = "application/json") public
-	 * EntityModel<Customer> getCustomerById(@PathVariable("id") int id) { Customer
-	 * c = customerService.get(id); if (c == null) { throw new
-	 * CustomerNotFoundException("Customer Not Found!!"); }
-	 * 
-	 * return new EntityModel<Customer>(c,
-	 * linkTo(methodOn(this.getClass()).getAllCustomer()).withRel("all-users"));
-	 * 
-	 * }
-	 */
+//	/*
+//	 * @GetMapping(value = "/customers/{id}", produces = "application/json") public
+//	 * EntityModel<Customer> getCustomerById(@PathVariable("id") int id) { Customer
+//	 * c = customerService.get(id); if (c == null) { throw new
+//	 * CustomerNotFoundException("Customer Not Found!!"); }
+//	 * 
+//	 * return new EntityModel<Customer>(c,
+//	 * linkTo(methodOn(this.getClass()).getAllCustomer()).withRel("all-users"));
+//	 * 
+//	 * }
+//	 */
+
+	@GetMapping(value = "/customers/{id}", produces = "application/json")
+	public MappingJacksonValue getCustomerById(@PathVariable("id") int id) {
+		Customer c = customerService.get(id);
+		if (c == null) {
+			throw new CustomerNotFoundException("Customer Not Found!!");
+		}
+		MappingJacksonValue mjv = new MappingJacksonValue(c);
+		mjv.setFilters(new SimpleFilterProvider().addFilter("customerFilter",
+				SimpleBeanPropertyFilter.filterOutAllExcept("id")));
+		return mjv;
+	}
 
 	@PostMapping(value = "/customers", consumes = "application/json")
 	public ResponseEntity<Object> saveCustomer(@Valid @RequestBody Customer customer) {
 		Customer savedCustomer = customerService.add(customer);
+
 		return ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(savedCustomer.getId()).toUri()).build();
 	}
@@ -219,17 +237,14 @@ class SwaggerConfig {
 	public static final ApiInfo DEFAULT_API_INFO = new ApiInfoBuilder().contact(DEFAULT_CONTACT)
 			.title("My Api Document").description("Api Documentation").version("1.0").termsOfServiceUrl("urn:tos")
 			.license("Apache 2.0").licenseUrl("http://www.apache.org/licenses/LICENSE-2.0").build();
-	
-	public static final Set<String> DEFAULT_CONSUMER_PRODUCER= new HashSet<>(Arrays.asList("application/json","application/xml"));
+
+	public static final Set<String> DEFAULT_CONSUMER_PRODUCER = new HashSet<>(
+			Arrays.asList("application/json", "application/xml"));
 
 	@Bean
 	public Docket api() {
 		return new Docket(DocumentationType.SWAGGER_2).consumes(DEFAULT_CONSUMER_PRODUCER)
-													  .produces(DEFAULT_CONSUMER_PRODUCER)
-													  .apiInfo(DEFAULT_API_INFO)
-													  .select()
-													  .apis(RequestHandlerSelectors.any())
-													  .paths(PathSelectors.any())
-													  .build();
+				.produces(DEFAULT_CONSUMER_PRODUCER).apiInfo(DEFAULT_API_INFO).select()
+				.apis(RequestHandlerSelectors.any()).paths(PathSelectors.any()).build();
 	}
 }
